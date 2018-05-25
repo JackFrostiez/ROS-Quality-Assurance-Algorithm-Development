@@ -1,0 +1,120 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+try:
+    import vrep
+except:
+    print ('--------------------------------------------------------------')
+    print ('"vrep.py" could not be imported. This means very probably that')
+    print ('either "vrep.py" or the remoteApi library could not be found.')
+    print ('Make sure both are in the same folder as this file,')
+    print ('or appropriately adjust the file "vrep.py"')
+    print ('--------------------------------------------------------------')
+    print ('')
+
+
+print ('Program started')
+vrep.simxFinish(-1) # just in case, close all opened connections
+clientID=vrep.simxStart('127.0.0.1',19997,True,True,5000,5) # Connect to V-REP
+print("Client ID")
+print(clientID)
+
+joint1ReturnCode, joint1Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint1', vrep.simx_opmode_oneshot_wait)
+joint2ReturnCode, joint2Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint2', vrep.simx_opmode_oneshot_wait)
+joint3ReturnCode, joint3Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint3', vrep.simx_opmode_oneshot_wait)
+joint4ReturnCode, joint4Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint4', vrep.simx_opmode_oneshot_wait)
+joint5ReturnCode, joint5Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint5', vrep.simx_opmode_oneshot_wait)
+joint6ReturnCode, joint6Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint6', vrep.simx_opmode_oneshot_wait)
+targetReturnCode, targetHandler = vrep.simxGetObjectHandle(clientID, 'Target', vrep.simx_opmode_oneshot_wait)
+cupReturnCode, cupHandler = vrep.simxGetObjectHandle(clientID, 'Cup', vrep.simx_opmode_oneshot_wait)
+gripperReturnCode, gripperHandler = vrep.simxGetObjectHandle(clientID, 'ROBOTIQ_85_attachPoint', vrep.simx_opmode_oneshot_wait)
+secondTableReturnCode, secondTableHandler = vrep.simxGetObjectHandle(clientID, 'SecondTable', vrep.simx_opmode_oneshot_wait)
+
+
+dt = 0.01
+o_stepDist = 0.001
+
+if clientID > -1:
+
+##    joint4ReturnCode, joint4Position = vrep.simxGetJointPosition(clientID, joint4Handler, vrep.simx_opmode_oneshot_wait)
+##    print(joint4Position)
+##    vrep.simxSetJointPosition(clientID, joint4Handler, joint4Position + 3.1415926, vrep.simx_opmode_oneshot_wait)
+
+    
+    targetReturnCode, targetPosition = vrep.simxGetObjectPosition(clientID, targetHandler, -1, vrep.simx_opmode_oneshot_wait)
+    targetPosition = np.array(targetPosition)
+    print("Target Pos: ")
+    print(targetPosition)
+    cupReturnCode, cupPosition = vrep.simxGetObjectPosition(clientID, cupHandler, -1, vrep.simx_opmode_oneshot_wait)
+    cupPosition = np.array(cupPosition)
+    print("Cup Pos: ")
+    print(cupPosition)
+    secondTableReturnCode, secondTablePosition = vrep.simxGetObjectPosition(clientID, secondTableHandler, -1, vrep.simx_opmode_oneshot_wait)
+    secondTablePosition = np.array(secondTablePosition)
+
+    desirePosition = cupPosition - targetPosition
+    print("Desire Pos: ")
+    print(desirePosition)
+
+    x = desirePosition[0] + 0.1
+    y = desirePosition[1]
+    z = desirePosition[2]
+    for i in range(1,250):
+        targetPosition[0] = targetPosition[0] + x/250
+        targetPosition[1] = targetPosition[1] + y/250
+        targetPosition[2] = targetPosition[2] + z/250
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+
+    for i in range(1,100):
+        targetPosition[0] = targetPosition[0] - 0.1/100
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+
+    vrep.simxSetObjectParent(clientID, cupHandler, gripperHandler, True, vrep.simx_opmode_oneshot_wait);
+    time.sleep(0.5)
+
+    for i in range(1,100):
+        targetPosition[2] = targetPosition[2] + 0.2/100
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+
+    placePosition = secondTablePosition - targetPosition
+    
+    x = placePosition[0]
+    y = placePosition[1]
+
+    for i in range(1,250):
+        targetPosition[0] = targetPosition[0] + x/250
+        targetPosition[1] = targetPosition[1] + y/250
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+
+    for i in range(1,100):
+        targetPosition[2] = targetPosition[2] - 0.2/100
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+
+    vrep.simxSetObjectParent(clientID, cupHandler, -1, True, vrep.simx_opmode_oneshot_wait);
+    time.sleep(0.5)
+
+    for i in range(1,100):
+        targetPosition[0] = targetPosition[0] + 0.1/100
+        vrep.simxSetObjectPosition(clientID, targetHandler, -1, targetPosition, vrep.simx_opmode_oneshot_wait)
+        time.sleep(dt)
+    
+
+
+vrep.simxFinish(clientID);
+
+
+## t = 0:0.001:pi
+def generateLinearPath(p1, p2, t):
+    x = (p1[0]-p2[0])/2*np.cos(t)+(p1[0]+p2[0])/2
+    y = (p1[1]-p2[1])/2*np.cos(t)+(p1[1]+p2[1])/2
+    z = (p1[2]-p2[2])/2*np.cos(t)+(p1[2]+p2[2])/2
+    return x,y
+
+
+

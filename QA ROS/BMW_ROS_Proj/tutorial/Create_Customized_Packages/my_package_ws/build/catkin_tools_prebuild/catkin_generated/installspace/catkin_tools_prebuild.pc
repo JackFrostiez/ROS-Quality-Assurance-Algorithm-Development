@@ -1,0 +1,8 @@
+prefix=/home/q/ros_ws/my_package_ws/install
+
+Name: catkin_tools_prebuild
+Description: Description of catkin_tools_prebuild
+Version: 0.0.0
+Cflags: 
+Libs: -L/home/q/ros_ws/my_package_ws/install/lib 
+Requires: 

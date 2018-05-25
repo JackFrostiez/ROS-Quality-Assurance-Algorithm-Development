@@ -1,0 +1,110 @@
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+try:
+    import vrep
+except:
+    print ('--------------------------------------------------------------')
+    print ('"vrep.py" could not be imported. This means very probably that')
+    print ('either "vrep.py" or the remoteApi library could not be found.')
+    print ('Make sure both are in the same folder as this file,')
+    print ('or appropriately adjust the file "vrep.py"')
+    print ('--------------------------------------------------------------')
+    print ('')
+
+
+print ('Program started')
+vrep.simxFinish(-1) # just in case, close all opened connections
+clientID=vrep.simxStart('127.0.0.1',19997,True,True,5000,5) # Connect to V-REP
+print(clientID)
+
+joint1ReturnCode, joint1Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint1', vrep.simx_opmode_oneshot_wait);
+joint2ReturnCode, joint2Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint2', vrep.simx_opmode_oneshot_wait);
+joint3ReturnCode, joint3Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint3', vrep.simx_opmode_oneshot_wait);
+joint4ReturnCode, joint4Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint4', vrep.simx_opmode_oneshot_wait);
+joint5ReturnCode, joint5Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint5', vrep.simx_opmode_oneshot_wait);
+joint6ReturnCode, joint6Handler = vrep.simxGetObjectHandle(clientID, 'UR3_joint6', vrep.simx_opmode_oneshot_wait);
+
+print(joint1Handler)
+
+
+##IC = np.array([[np.pi/6],[-np.pi/6]])
+##
+##l1 = 467
+##l2 = 400.5
+##
+##t = np.arange(start = 0, stop = np.pi, step = np.pi/500)
+##
+##p1 = np.array([847.5, -20])
+##p2 = np.array([768.6, -295.2])
+##p3 = np.array([300, -295.2])
+##p4 = np.array([300, 390])
+##p5 = np.array([752, 390])
+##
+##x1,y1 = generateLinearPath(p1,p2,t)
+##x2,y2 = generateLinearPath(p2,p3,t)
+##x3,y3 = generateLinearPath(p3,p4,t)
+##x4,y4 = generateLinearPath(p4,p5,t)
+##
+##theta = np.array(np.linspace(0,np.pi,100))
+
+dt = 750;
+t = np.linspace(0,1,dt)
+theta = np.pi/4 * np.sin(np.pi * t) + np.pi/4
+theta = np.hstack([theta,theta[::-1]])
+
+if clientID > -1:
+    # Perform Behavior
+    for i in range(0,theta.size):
+        vrep.simxSetJointPosition(clientID, joint1Handler, theta[i], vrep.simx_opmode_oneshot)
+##        vrep.simxSetJointPosition(clientID, joint2Handler, theta[i], vrep.simx_opmode_oneshot)
+##        vrep.simxSetJointPosition(clientID, joint3Handler, theta[i], vrep.simx_opmode_oneshot)
+##        vrep.simxSetJointPosition(clientID, joint4Handler, theta[i], vrep.simx_opmode_oneshot)
+##        vrep.simxSetJointPosition(clientID, joint5Handler, theta[i], vrep.simx_opmode_oneshot)
+##        vrep.simxSetJointPosition(clientID, joint6Handler, theta[i], vrep.simx_opmode_oneshot)
+        time.sleep(0.01)
+
+        
+    
+vrep.simxFinish(clientID);
+# disconnect from the V-REP software
+#vrep.delete();
+# call the destructor to delete vrep object!
+
+
+
+##def generateLinearPath(p1, p2, t):
+##    x = (p1[0]-p2[0])/2*np.cos(t)+(p1[0]+p2[0])/2
+##    y = (p1[1]-p2[1])/2*np.cos(t)+(p1[1]+p2[1])/2
+##    return x,y
+##
+##def ForwardKinematics_UR3(q):
+##    theta = np.array([q[0], q[1]+np.pi/2, q[2], q[3]+np.pi/2, q[4], q[5]])
+##    a = np.array([0, 244, 213, 0, 0, 0])
+##    alpha = np.array([np.pi/2, 0, 0, np.pi/2, -np.pi/2, 0])
+##    d = np.array([152, 120, -93, 83, 83, 82]);
+##    
+##    H = np.identity(4)
+##    for i in range(0,np.size(q)):
+##        H = H.dot([[np.cos(theta[i]), -np.sin(theta[i])*np.cos(alpha[i]), np.sin(theta[i])*np.sin(alpha[i]), a[i]*np.cos(theta[i])],
+##                   [np.sin(theta[i]), np.cos(theta[i])*np.cos(alpha[i]), -np.cos(theta[i])*np.sin(alpha[i]), a[i]*np.sin(theta[i])],
+##                   [0, np.sin(alpha[i]), np.cos(alpha[i]), d[i]],
+##                   [0, 0, 0, 1]])
+##    
+##    temp = H.dot(np.array([[0, 0, 0, 1]]).T)
+##    p = temp[0:3]
+##    return p
+
+
+
+
+
+
+
+
+
+
+
+
+

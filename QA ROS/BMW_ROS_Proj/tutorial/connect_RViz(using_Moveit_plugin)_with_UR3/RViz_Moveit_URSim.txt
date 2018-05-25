@@ -1,0 +1,18 @@
+Source the setup.bash file first.
+
+Step 1:
+	Start URSim (or connect UR3 to computer).
+		$ cd ~/ur-3.4.5-100
+		$ ./start-ursim.sh UR3
+
+Step 2:
+	Bringup URSim with ROS (change the robot_ip address if it's the real robot).
+		$ roslaunch ur_modern_driver ur3_bringup_joint_limited.launch limited:=true robot_ip:=127.0.0.1
+
+Step 3:
+	Start moveit_planning_execution action server.
+		$ roslaunch ur3_moveit_config ur3_moveit_planning_execution.launch 
+
+Step 4:
+	Start RViz with the UR3 model loaded (in this way, all joint will move from -pi to pi).
+		$ roslaunch ur3_moveit_config moveit_rviz.launch config:=true

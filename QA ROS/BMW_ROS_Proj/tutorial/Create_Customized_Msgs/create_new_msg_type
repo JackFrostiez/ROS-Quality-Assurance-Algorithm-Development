@@ -1,0 +1,55 @@
+How to Prepare CMakeLists.txt and package.xml for Custom Topic Message Compilation
+
+In order to create a new message, you will need to do the following steps:
+
+    1. Create a directory named 'msg' inside your package
+    2. Inside this directory, create a file named Name_of_your_message.msg (more information down)
+    3. Modify CMakeLists.txt file (more information down)
+    4. Modify package.xml file (more information down)
+    5. Compile
+    6. Use in code
+
+
+For example, we are going to create a message type called "Age"
+
+
+Step 1:
+	cd to your package
+		$ cd ~/catkin_ws/src/my_package
+	create msg directory
+		$ mkdir msg
+	
+Step 2:
+	create a file named "Age.msg" in msg folder
+	put data type and variable names in the folder, e.g.:
+		float32 years
+		float32 months
+		float32 days
+	
+Step 3:
+	Edit CMakeLists.txt file in the package folder.
+	We need to edit 4 functions:
+		find_package()
+		add_message_files()
+		generate_messages()
+		catkin_package()
+	
+	For find_package(), put "message_generation" after the other packages:
+	
+### Code Start ###
+find_package(catkin REQUIRED COMPONENTS
+	rospy
+	std_msgs
+	message_generation
+)
+### Code End ###
+		
+	
+	
+	
+	
+	
+	
+	
+	
+	
